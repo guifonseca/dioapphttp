@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:trilhaapp/services/app_storage_service.dart';
+import 'package:trilhaapp/model/configuracoes_model.dart';
+import 'package:trilhaapp/repositories/configuracoes_repository.dart';
 
-class ConfiguracoesPage extends StatefulWidget {
-  const ConfiguracoesPage({super.key});
+class ConfiguracoesHivePage extends StatefulWidget {
+  const ConfiguracoesHivePage({super.key});
 
   @override
-  State<ConfiguracoesPage> createState() => _ConfiguracoesPageState();
+  State<ConfiguracoesHivePage> createState() => _ConfiguracoesHivePageState();
 }
 
-class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
+class _ConfiguracoesHivePageState extends State<ConfiguracoesHivePage> {
   TextEditingController nomeUsuarioController = TextEditingController();
   TextEditingController alturaController = TextEditingController();
 
-  String? nomeUsuario;
-  double? altura;
-  bool receberNotificacoes = false;
-  bool temaEscuro = false;
-
-  AppStorageService appStorageService = AppStorageService();
+  late ConfiguracoesRepository configuracoesRepository;
+  ConfiguracoesModel configuracoesModel = ConfiguracoesModel.empty();
 
   @override
   void initState() {
@@ -26,12 +23,10 @@ class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
   }
 
   void carregarDados() async {
-    nomeUsuarioController.text = await appStorageService.getConfigNomeUsuario();
-    alturaController.text =
-        (await appStorageService.getConfigAltura()).toString();
-    receberNotificacoes =
-        await appStorageService.getConfigReceberNotificacoes();
-    temaEscuro = await appStorageService.getConfigTemaEscuro();
+    configuracoesRepository = await ConfiguracoesRepository.carregar();
+    configuracoesModel = configuracoesRepository.obterDados();
+    nomeUsuarioController.text = configuracoesModel.nomeUsuario;
+    alturaController.text = configuracoesModel.altura.toString();
     setState(() {});
   }
 
@@ -62,19 +57,19 @@ class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
             ),
             SwitchListTile(
               title: const Text("Receber notificações"),
-              value: receberNotificacoes,
+              value: configuracoesModel.receberNotificacoes,
               onChanged: (value) {
                 setState(() {
-                  receberNotificacoes = value;
+                  configuracoesModel.receberNotificacoes = value;
                 });
               },
             ),
             SwitchListTile(
               title: const Text("Tema escuro"),
-              value: temaEscuro,
+              value: configuracoesModel.temaEscuro,
               onChanged: (value) {
                 setState(() {
-                  temaEscuro = value;
+                  configuracoesModel.temaEscuro = value;
                 });
               },
             ),
@@ -83,8 +78,8 @@ class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
                   FocusManager.instance.primaryFocus?.unfocus();
                   await Future.delayed(const Duration(milliseconds: 500));
                   try {
-                    await appStorageService
-                        .setConfigAltura(double.parse(alturaController.text));
+                    configuracoesModel.altura =
+                        double.parse(alturaController.text);
                   } catch (e) {
                     Future.delayed(
                       const Duration(milliseconds: 500),
@@ -109,11 +104,8 @@ class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
 
                     return;
                   }
-                  await appStorageService
-                      .setConfigNomeUsuario(nomeUsuarioController.text);
-                  await appStorageService
-                      .setConfigReceberNotificacoes(receberNotificacoes);
-                  await appStorageService.setConfigTemaEscuro(temaEscuro);
+                  configuracoesModel.nomeUsuario = nomeUsuarioController.text;
+                  configuracoesRepository.salvar(configuracoesModel);
                   Future.delayed(
                     const Duration(milliseconds: 100),
                     () {

@@ -1,17 +1,18 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:trilhaapp/services/app_storage_service.dart';
+import 'package:hive/hive.dart';
 
-class NumerosAleatoriosPage extends StatefulWidget {
-  const NumerosAleatoriosPage({super.key});
+class NumerosAleatoriosHivePage extends StatefulWidget {
+  const NumerosAleatoriosHivePage({super.key});
 
   @override
-  State<NumerosAleatoriosPage> createState() => _NumerosAleatoriosPageState();
+  State<NumerosAleatoriosHivePage> createState() =>
+      _NumerosAleatoriosHivePageState();
 }
 
-class _NumerosAleatoriosPageState extends State<NumerosAleatoriosPage> {
-  AppStorageService appStorageService = AppStorageService();
+class _NumerosAleatoriosHivePageState extends State<NumerosAleatoriosHivePage> {
+  late Box boxNumerosAleatorios;
 
   int numeroGerado = 0;
   int quantidadeCliques = 0;
@@ -23,8 +24,14 @@ class _NumerosAleatoriosPageState extends State<NumerosAleatoriosPage> {
   }
 
   void carregarDados() async {
-    numeroGerado = await appStorageService.getNumeroAleatorio();
-    quantidadeCliques = await appStorageService.getQuantidadeCliques();
+    if (Hive.isBoxOpen('box_numeros_aleatorios')) {
+      boxNumerosAleatorios = Hive.box('box_numeros_aleatorios');
+    } else {
+      boxNumerosAleatorios = await Hive.openBox('box_numeros_aleatorios');
+    }
+
+    numeroGerado = boxNumerosAleatorios.get('numeroGerado') ?? 0;
+    quantidadeCliques = boxNumerosAleatorios.get('quantidadeCliques') ?? 0;
     setState(() {});
   }
 
@@ -60,8 +67,9 @@ class _NumerosAleatoriosPageState extends State<NumerosAleatoriosPage> {
               numeroGerado = random.nextInt(1000);
               quantidadeCliques = quantidadeCliques + 1;
             });
-            await appStorageService.setNumeroAleatorio(numeroGerado);
-            await appStorageService.setQuantidadeCliques(quantidadeCliques);
+            await boxNumerosAleatorios.put('numeroGerado', numeroGerado);
+            await boxNumerosAleatorios.put(
+                'quantidadeCliques', quantidadeCliques);
           },
           child: const Icon(Icons.add)),
     ));

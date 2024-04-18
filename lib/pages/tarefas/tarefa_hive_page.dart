@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:trilhaapp/model/tarefa.dart';
-import 'package:trilhaapp/repositories/tarefa_repository.dart';
+import 'package:trilhaapp/model/tarefa_hive_model.dart';
+import 'package:trilhaapp/repositories/tarefa_hive_repository.dart';
 
-class TarefaPage extends StatefulWidget {
-  const TarefaPage({super.key});
+class TarefaHivePage extends StatefulWidget {
+  const TarefaHivePage({super.key});
 
   @override
-  State<TarefaPage> createState() => _TarefaPageState();
+  State<TarefaHivePage> createState() => _TarefaHivePageState();
 }
 
-class _TarefaPageState extends State<TarefaPage> {
-  var tarefaRepository = TarefaRepository();
-  var _tarefas = const <Tarefa>[];
+class _TarefaHivePageState extends State<TarefaHivePage> {
+  late TarefaHiveRepository tarefaHiveRepository;
+  var _tarefas = const <TarefaHiveModel>[];
   var apenasNaoConcluidos = false;
   TextEditingController descricaoController = TextEditingController(text: "");
 
@@ -22,12 +22,8 @@ class _TarefaPageState extends State<TarefaPage> {
   }
 
   void obterTarefas() async {
-    if (apenasNaoConcluidos) {
-      _tarefas = await tarefaRepository.listarNaoConcluidas();
-    } else {
-      _tarefas = await tarefaRepository.listarTarefas();
-    }
-
+    tarefaHiveRepository = await TarefaHiveRepository.carregar();
+    _tarefas = tarefaHiveRepository.obterDados(apenasNaoConcluidos);
     setState(() {});
   }
 
@@ -53,8 +49,9 @@ class _TarefaPageState extends State<TarefaPage> {
                       TextButton(
                           onPressed: () async {
                             Navigator.pop(context);
-                            await tarefaRepository.adicionar(
-                                Tarefa(descricaoController.text, false));
+                            tarefaHiveRepository.salvar(TarefaHiveModel.criar(
+                                descricaoController.text, false));
+                            obterTarefas();
                             setState(() {});
                           },
                           child: const Text("Salvar"))
@@ -93,15 +90,16 @@ class _TarefaPageState extends State<TarefaPage> {
                   var tarefa = _tarefas[index];
                   return Dismissible(
                     onDismissed: (direction) async {
-                      await tarefaRepository.remove(tarefa.id);
+                      tarefaHiveRepository.excluir(tarefa);
                       obterTarefas();
                     },
-                    key: Key(tarefa.id),
+                    key: Key(tarefa.descricao),
                     child: ListTile(
                       title: Text(tarefa.descricao),
                       trailing: Switch(
                         onChanged: (value) async {
-                          await tarefaRepository.alterar(tarefa.id, value);
+                          tarefa.concluido = value;
+                          tarefaHiveRepository.alterar(tarefa);
                           obterTarefas();
                         },
                         value: tarefa.concluido,

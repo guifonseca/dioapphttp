@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:trilhaapp/pages/configuracoes_page.dart';
-import 'package:trilhaapp/pages/dados_cadastrais.dart';
+import 'package:trilhaapp/pages/characters/characters_page.dart';
+import 'package:trilhaapp/pages/configuracoes/configuracoes_hive_page.dart';
+import 'package:trilhaapp/pages/dados_cadastrais/dados_cadastrais_hive_page.dart';
 import 'package:trilhaapp/pages/login_page.dart';
-import 'package:trilhaapp/pages/numeros_aleatorios_page.dart';
+import 'package:trilhaapp/pages/numeros_aleatorios/numeros_aleatorios_hive_page.dart';
+import 'package:trilhaapp/pages/posts_page.dart';
+import 'package:trilhaapp/pages/tarefas/tarefa_http_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -10,8 +13,7 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
         children: [
           UserAccountsDrawerHeader(
               decoration: const BoxDecoration(color: Colors.orange),
@@ -51,7 +53,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const DadosCadastraisPage(),
+                      builder: (context) => const DadosCadastraisHivePage(),
                     ));
               },
               child: Container(
@@ -121,7 +123,8 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NumerosAleatoriosPage()));
+                        builder: (context) =>
+                            const NumerosAleatoriosHivePage()));
               },
               child: Container(
                   padding:
@@ -146,7 +149,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ConfiguracoesPage()));
+                        builder: (context) => const ConfiguracoesHivePage()));
               },
               child: Container(
                   padding:
@@ -159,6 +162,79 @@ class CustomDrawer extends StatelessWidget {
                         width: 5,
                       ),
                       Text("Configurações"),
+                    ],
+                  ))),
+          const Divider(),
+          const SizedBox(
+            height: 10,
+          ),
+          InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const PostsPage()));
+              },
+              child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  width: double.infinity,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.post_add),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Posts"),
+                    ],
+                  ))),
+          const Divider(),
+          const SizedBox(
+            height: 10,
+          ),
+          InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CharactersPage()));
+              },
+              child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  width: double.infinity,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.list),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Heróis"),
+                    ],
+                  ))),
+          const Divider(),
+          const SizedBox(
+            height: 10,
+          ),
+          InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TarefaHttpPage()));
+              },
+              child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  width: double.infinity,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.task_alt_outlined),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Tarefas"),
                     ],
                   ))),
           const Divider(),
